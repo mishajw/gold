@@ -6,5 +6,5 @@ from gold import Fetcher
 
 class Writer(ABC):
     @abstractmethod
-    def write(self, fetcher: List[Fetcher]) -> None:
+    def write(self, fetchers: List[Fetcher]) -> None:
         pass
