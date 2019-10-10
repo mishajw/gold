@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import List
 
-from pymonzo import MonzoAPI
+from libmonzo import MonzoClient
 
 from gold import Fetcher, Payment
 
@@ -18,36 +18,35 @@ AUTH_CODE_URL_TEMPLATE = (
 
 
 class MonzoFetcher(Fetcher):
-    def __init__(self, credentials_file: Path, auth_code_output_file: Path):
+    def __init__(self, credentials_file: Path, access_token_cache_file: Path):
         self.credentials_file = credentials_file
-        self.auth_code_output_file = auth_code_output_file
+        self.access_token_cache_file = access_token_cache_file
 
     def fetch(self) -> List[Payment]:
         api = self.__get_api()
         account = api.accounts()[0]
         LOG.debug("Fetched account: %s", account)
-        transactions = api.transactions(account)
+        transactions = api.transactions(account_id=account.identifier)
         LOG.debug("Fetched %d transactions: %s", len(transactions), transactions)
         raise NotImplementedError()
 
-    def __get_api(self) -> MonzoAPI:
+    def __get_api(self) -> MonzoClient:
         with open(str(self.credentials_file), "r") as f:
             credentials = json.load(f)
+        assert "client_id" in credentials, "Can't find client_id in credentials."
+        assert "owner_id" in credentials, "Can't find owner_id in credentials."
+        assert "client_secret" in credentials, "Can't find client_secret in credentials."
 
-        if "access_token" in credentials:
-            return MonzoAPI(access_token=credentials["access_token"])
-
-        # TODO: Check this works.
-        assert "client_id" in credentials, "Can't find ID in credentials."
-        assert "client_secret" in credentials, "Can't find secret in credentials."
-
-        auth_code_url = AUTH_CODE_URL_TEMPLATE.format(credentials["client_id"])
-        print(f"Go to {auth_code_url} and paste the response here.")
-        auth_code = input("Response: ").strip()
-
-        LOG.debug("Creating Monzo API")
-        return MonzoAPI(
+        client = MonzoClient(
             client_id=credentials["client_id"],
+            owner_id=credentials["owner_id"],
             client_secret=credentials["client_secret"],
-            auth_code=auth_code,
         )
+
+        if self.access_token_cache_file.is_file():
+            access_token = self.access_token_cache_file.read_text().strip()
+            client.access_token = access_token
+        else:
+            assert client.authenticate()
+            self.access_token_cache_file.write_text(client.access_token)
+        return client
