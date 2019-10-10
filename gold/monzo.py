@@ -9,13 +9,6 @@ from gold import Fetcher, Payment
 
 LOG = logging.getLogger(__name__)
 
-AUTH_CODE_URL_TEMPLATE = (
-    "https://auth.monzo.com/"
-    "?response_type=code"
-    "&redirect_uri=https://github.com/pawelad/pymonzo"
-    "&client_id={}"
-)
-
 
 class MonzoFetcher(Fetcher):
     def __init__(self, credentials_file: Path, access_token_cache_file: Path):
@@ -25,10 +18,18 @@ class MonzoFetcher(Fetcher):
     def fetch(self) -> List[Payment]:
         api = self.__get_api()
         account = api.accounts()[0]
-        LOG.debug("Fetched account: %s", account)
+        LOG.debug("Fetched account: %s", account.identifier)
         transactions = api.transactions(account_id=account.identifier)
-        LOG.debug("Fetched %d transactions: %s", len(transactions), transactions)
-        raise NotImplementedError()
+        LOG.debug("Fetched %d transactions", len(transactions))
+        return [
+            Payment(
+                transaction.description,
+                transaction.amount,
+                transaction.created,
+                transaction.raw_data["category"],
+            )
+            for transaction in transactions
+        ]
 
     def __get_api(self) -> MonzoClient:
         with open(str(self.credentials_file), "r") as f:
