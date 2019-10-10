@@ -7,3 +7,4 @@ class Payment(NamedTuple):
     amount_pence: int
     time: datetime
     category: Optional[str]
+    source: str

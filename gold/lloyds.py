@@ -49,6 +49,7 @@ class LloydsFetcher(Fetcher):
                 parse_amount_pence(line[FIELD_MONEY_IN], line[FIELD_MONEY_OUT]),
                 parse_time(line[FIELD_DATE]),
                 None,
+                "lloyds",
             )
             for line in lines
         ]

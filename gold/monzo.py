@@ -27,6 +27,7 @@ class MonzoFetcher(Fetcher):
                 transaction.amount,
                 transaction.created,
                 transaction.raw_data["category"],
+                "monzo",
             )
             for transaction in transactions
         ]
