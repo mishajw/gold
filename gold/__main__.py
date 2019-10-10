@@ -2,7 +2,7 @@ import logging
 from argparse import ArgumentParser
 from pathlib import Path
 
-from gold import MonzoFetcher, SheetsWriter, LloydsFetcher
+from gold import MonzoFetcher, LloydsFetcher
 
 
 def main():
@@ -16,8 +16,9 @@ def main():
         LloydsFetcher(Path(args.lloyds_csv)),
         MonzoFetcher(Path(args.monzo_credentials), Path(args.monzo_cache)),
     ]
-    writer = SheetsWriter()
-    writer.write(fetchers)
+    for fetcher in fetchers:
+        for payment in fetcher.fetch():
+            print(payment)
 
 
 if __name__ == "__main__":
