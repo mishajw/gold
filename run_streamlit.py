@@ -38,16 +38,17 @@ def main():
     assert payments, "No payments matched."
 
     payments = pd.DataFrame(payments)
+    by_time = sum_by_column(round_to_period(payments, 7), "time")
     by_entity = sum_by_column(payments, "entity")
     by_category = sum_by_column(payments, "category")
 
     st.subheader("By date")
-    st.write(format_df(payments))
+    st.line_chart(index(by_time, "time"))
     st.subheader("By entity")
-    bar_chart(by_entity, "entity")
+    st.bar_chart(index(by_entity, "entity").sort_values("amount_pence").head(30), height=300)
     st.write(format_df(by_entity))
     st.subheader("By category")
-    bar_chart(by_category, "category")
+    st.bar_chart(index(by_category, "category").sort_values("amount_pence"))
     st.write(format_df(by_category))
 
 
@@ -67,14 +68,23 @@ def sum_by_column(payments: pd.DataFrame, column: str) -> pd.DataFrame:
     return payments.groupby(column)["amount_pence"].sum().sort_values(ascending=False).reset_index()
 
 
-def bar_chart(df: pd.DataFrame, column: str) -> None:
-    st.bar_chart(
-        df.rename({column: "index"}, axis=1)
-        .set_index("index")
-        .sort_values("amount_pence")
-        .head(10),
-        height=300,
-    )
+def index(df: pd.DataFrame, column: str) -> pd.DataFrame:
+    return df.rename({column: "index"}, axis=1).set_index("index")
+
+
+def round_to_period(df: pd.DataFrame, num_days: int) -> pd.DataFrame:
+    now_date = datetime.now().date()
+
+    def round_datetime(time: datetime) -> datetime:
+        distance_days = (now_date - time.date()).days
+        period_start_days_ago = (distance_days // num_days + 1) * num_days
+        return datetime.combine(
+            now_date - timedelta(days=period_start_days_ago), datetime.min.time()
+        )
+
+    df = df.copy()
+    df["time"] = df["time"].apply(round_datetime)
+    return df
 
 
 def format_df(payments: pd.DataFrame) -> pd.DataFrame:
