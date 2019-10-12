@@ -18,9 +18,17 @@ args = parser.parse_args()
 
 
 def main():
-    payments = payments_to_df(get_payments())
+    payments = pd.DataFrame(get_payments())
+    by_entity = sum_by_column(payments, "entity")
+    by_category = sum_by_column(payments, "category")
+
     st.header("Gold")
-    st.write(payments)
+    st.subheader("By date")
+    st.write(format_df(payments))
+    st.subheader("By entity")
+    st.write(format_df(by_entity))
+    st.subheader("By category")
+    st.write(format_df(by_category))
 
 
 @st.cache
@@ -32,12 +40,17 @@ def get_payments() -> List[Payment]:
     return [payment for fetcher in fetchers for payment in fetcher.fetch()]
 
 
-def payments_to_df(payments: List[Payment]) -> pd.DataFrame:
-    payments = pd.DataFrame(payments)
-    payments["time"] = payments["time"].map(lambda d: d.strftime(TIME_FORMAT))
-    payments["amount"] = payments["amount_pence"].map(lambda p: f"{p / 100:.2f}")
-    del payments["amount_pence"]
-    payments = payments.sort_values("time", ascending=False)
+def sum_by_column(payments: pd.DataFrame, column: str) -> pd.DataFrame:
+    return payments.groupby(column)["amount_pence"].sum().sort_values(ascending=False).to_frame()
+
+
+def format_df(payments: pd.DataFrame) -> pd.DataFrame:
+    if "amount_pence" in payments:
+        payments["amount"] = payments["amount_pence"].map(lambda p: f"{p / 100:.2f}")
+        del payments["amount_pence"]
+    if "time" in payments:
+        payments["time"] = payments["time"].map(lambda d: d.strftime(TIME_FORMAT))
+        payments = payments.sort_values("time", ascending=False)
     return payments
 
 
