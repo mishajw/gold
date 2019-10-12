@@ -5,12 +5,13 @@ from typing import List
 
 from libmonzo import MonzoClient
 
-from gold import Fetcher, Payment
+from gold import Payment
+from gold.fetcher import Fetcher
 
 LOG = logging.getLogger(__name__)
 
 
-class MonzoFetcher(Fetcher):
+class Monzo(Fetcher):
     """
     Fetches payments using the Monzo API.
     """
@@ -21,8 +22,8 @@ class MonzoFetcher(Fetcher):
 
     def fetch(self) -> List[Payment]:
         api = self.__get_api()
-        account = api.accounts()[0]
-        LOG.debug("Fetched account: %s", account.identifier)
+        account = api.accounts()[1]
+        LOG.debug("Fetched account: %s", account.description)
         transactions = api.transactions(account_id=account.identifier)
         LOG.debug("Fetched %d transactions", len(transactions))
         return [

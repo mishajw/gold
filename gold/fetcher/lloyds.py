@@ -3,7 +3,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
-from gold import Fetcher, Payment
+from gold import Payment
+from gold.fetcher import Fetcher
 
 LOG = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ FIELD_MONEY_IN = HEADER.index("Credit Amount")
 FIELD_MONEY_OUT = HEADER.index("Debit Amount")
 
 
-class LloydsFetcher(Fetcher):
+class Lloyds(Fetcher):
     def __init__(self, csv_directory: Path):
         if not csv_directory.is_dir():
             csv_directory.mkdir(parents=True)
