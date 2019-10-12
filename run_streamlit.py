@@ -44,8 +44,10 @@ def main():
     st.subheader("By date")
     st.write(format_df(payments))
     st.subheader("By entity")
+    bar_chart(by_entity, "entity")
     st.write(format_df(by_entity))
     st.subheader("By category")
+    bar_chart(by_category, "category")
     st.write(format_df(by_category))
 
 
@@ -62,7 +64,17 @@ def get_payments() -> List[Payment]:
 
 
 def sum_by_column(payments: pd.DataFrame, column: str) -> pd.DataFrame:
-    return payments.groupby(column)["amount_pence"].sum().sort_values(ascending=False).to_frame()
+    return payments.groupby(column)["amount_pence"].sum().sort_values(ascending=False).reset_index()
+
+
+def bar_chart(df: pd.DataFrame, column: str) -> None:
+    st.bar_chart(
+        df.rename({column: "index"}, axis=1)
+        .set_index("index")
+        .sort_values("amount_pence")
+        .head(10),
+        height=300,
+    )
 
 
 def format_df(payments: pd.DataFrame) -> pd.DataFrame:
