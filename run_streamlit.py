@@ -3,6 +3,7 @@ Runs a streamlit UI displaying payment information.
 """
 import logging
 from argparse import ArgumentParser
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List
 
@@ -23,11 +24,23 @@ args = parser.parse_args()
 
 
 def main():
-    payments = pd.DataFrame(get_payments())
+    st.header("Gold")
+
+    payments = get_payments()
+    payment_specifier = PaymentSpecifier(
+        entity_regex=st.text_input("Entity regex:", ".*"),
+        time_min=datetime.combine(
+            st.date_input("From:", datetime.now() - timedelta(weeks=20)), datetime.min.time()
+        ),
+        time_max=datetime.combine(st.date_input("To:", datetime.now()), datetime.min.time()),
+    )
+    payments = list(filter(payment_specifier.matches, payments))
+    assert payments, "No payments matched."
+
+    payments = pd.DataFrame(payments)
     by_entity = sum_by_column(payments, "entity")
     by_category = sum_by_column(payments, "category")
 
-    st.header("Gold")
     st.subheader("By date")
     st.write(format_df(payments))
     st.subheader("By entity")
