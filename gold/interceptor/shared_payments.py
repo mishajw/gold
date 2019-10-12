@@ -23,7 +23,7 @@ class SharedPayments(FlatMapInterceptor):
         amount_per_person_pence = payment.amount_pence // (1 + len(self.entities))
         new_payment = payment.with_field(amount_pence=amount_per_person_pence)
         entity_payments = [
-            payment.with_field(entity=entity, amount_pence=amount_per_person_pence)
+            payment.with_field(entity=entity, amount_pence=amount_per_person_pence, category="lend")
             for entity in self.entities
         ]
         return [new_payment] + entity_payments
