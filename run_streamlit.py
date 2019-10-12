@@ -42,6 +42,7 @@ def main():
     assert payments, "No payments matched."
 
     payments = pd.DataFrame(payments)
+    st.write(format_df(payments))
 
     st.subheader("By date")
     by_time = index(sum_by_column(round_to_period(payments, 7), "time").sort_values("time"), "time")
