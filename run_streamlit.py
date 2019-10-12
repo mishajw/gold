@@ -39,11 +39,12 @@ def main():
 def get_payments() -> List[Payment]:
     return gold.get_payments(
         [
-            fetcher.Lloyds(Path(args.lloyds_csv)),
-            fetcher.Monzo(Path(args.monzo_credentials), Path(args.monzo_cache)),
+            # TODO: Add fetchers for your payments.
         ],
-        [interceptor.Rename("E KNIGHT", "EMMA KNIGHT")],
-        Path(args.payments_cache)
+        [
+            # TODO: Add interceptors for your payments.
+        ],
+        Path(args.payments_cache),
     )
 
 
