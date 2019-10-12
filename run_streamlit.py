@@ -1,3 +1,7 @@
+"""
+Runs a streamlit UI displaying payment information.
+"""
+
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import List

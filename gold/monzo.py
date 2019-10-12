@@ -11,6 +11,10 @@ LOG = logging.getLogger(__name__)
 
 
 class MonzoFetcher(Fetcher):
+    """
+    Fetches payments using the Monzo API.
+    """
+
     def __init__(self, credentials_file: Path, access_token_cache_file: Path):
         self.credentials_file = credentials_file
         self.access_token_cache_file = access_token_cache_file
