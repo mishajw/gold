@@ -17,16 +17,32 @@ class Interceptor(ABC):
         pass
 
 
-class SingleInterceptor(Interceptor, ABC):
+class MapInterceptor(Interceptor, ABC):
     """
     Modifies payments separately.
     """
 
     def intercept(self, payments: List[Payment]) -> List[Payment]:
-        return list(map(self.intercept_single, payments))
+        return list(map(self.map, payments))
 
     @abstractmethod
-    def intercept_single(self, payment: Payment) -> Payment:
+    def map(self, payment: Payment) -> Payment:
+        """
+        Replace a single payment with a new payment.
+        """
+        pass
+
+
+class FlatMapInterceptor(Interceptor, ABC):
+    """
+    Modifies payments separately.
+    """
+
+    def intercept(self, payments: List[Payment]) -> List[Payment]:
+        return [intercepted for payment in payments for intercepted in self.flat_map(payment)]
+
+    @abstractmethod
+    def flat_map(self, payment: Payment) -> List[Payment]:
         """
         Replace a single payment with a new payment.
         """

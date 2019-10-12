@@ -2,7 +2,6 @@
 Runs a streamlit UI displaying payment information.
 """
 import logging
-import pickle
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import List
@@ -11,7 +10,7 @@ import pandas as pd
 import streamlit as st
 
 import gold
-from gold import Payment, fetcher, interceptor
+from gold import Payment, fetcher, interceptor, PaymentSpecifier
 
 TIME_FORMAT = "%Y-%m-%d %H-%M-%S"
 
