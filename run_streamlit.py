@@ -2,6 +2,7 @@
 Runs a streamlit UI displaying payment information.
 """
 
+import pickle
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import List
@@ -15,8 +16,9 @@ TIME_FORMAT = "%Y-%m-%d %H-%M-%S"
 
 
 parser = ArgumentParser("gold")
+parser.add_argument("--payments-cache", type=str, default="secret/payments-cache")
 parser.add_argument("--monzo-credentials", type=str, default="secret/monzo.json")
-parser.add_argument("--monzo-cache", type=str, default="secret/monzo-cache.txt")
+parser.add_argument("--monzo-cache", type=str, default="secret/monzo-cache")
 parser.add_argument("--lloyds-csv", type=str, default="secret/lloyds")
 args = parser.parse_args()
 
@@ -35,13 +37,20 @@ def main():
     st.write(format_df(by_category))
 
 
-@st.cache
 def get_payments() -> List[Payment]:
+    payment_cache = Path(args.payments_cache)
+    if payment_cache.is_file():
+        with payment_cache.open("rb") as f:
+            return pickle.load(f)
+
     fetchers = [
         LloydsFetcher(Path(args.lloyds_csv)),
         MonzoFetcher(Path(args.monzo_credentials), Path(args.monzo_cache)),
     ]
-    return [payment for fetcher in fetchers for payment in fetcher.fetch()]
+    payments = [payment for fetcher in fetchers for payment in fetcher.fetch()]
+    with payment_cache.open("wb") as f:
+        pickle.dump(payments, f)
+    return payments
 
 
 def sum_by_column(payments: pd.DataFrame, column: str) -> pd.DataFrame:
