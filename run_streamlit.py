@@ -33,6 +33,9 @@ def main():
             st.date_input("From:", datetime.now() - timedelta(weeks=20)), datetime.min.time()
         ),
         time_max=datetime.combine(st.date_input("To:", datetime.now()), datetime.min.time()),
+        category=st.selectbox("Category", list(set(p.category for p in payments)))
+        if st.checkbox("Filter by category?")
+        else None,
     )
     payments = list(filter(payment_specifier.matches, payments))
     assert payments, "No payments matched."
