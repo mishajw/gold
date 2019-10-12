@@ -10,7 +10,8 @@ from typing import List
 import pandas as pd
 import streamlit as st
 
-from gold import Payment, fetcher
+import gold
+from gold import Payment, fetcher, interceptor
 
 TIME_FORMAT = "%Y-%m-%d %H-%M-%S"
 
@@ -37,19 +38,14 @@ def main():
 
 
 def get_payments() -> List[Payment]:
-    payment_cache = Path(args.payments_cache)
-    if payment_cache.is_file():
-        with payment_cache.open("rb") as f:
-            return pickle.load(f)
-
-    fetchers = [
-        fetcher.Lloyds(Path(args.lloyds_csv)),
-        fetcher.Monzo(Path(args.monzo_credentials), Path(args.monzo_cache)),
-    ]
-    payments = [payment for fetcher in fetchers for payment in fetcher.fetch()]
-    with payment_cache.open("wb") as f:
-        pickle.dump(payments, f)
-    return payments
+    return gold.get_payments(
+        [
+            fetcher.Lloyds(Path(args.lloyds_csv)),
+            fetcher.Monzo(Path(args.monzo_credentials), Path(args.monzo_cache)),
+        ],
+        [interceptor.Rename("E KNIGHT", "EMMA KNIGHT")],
+        Path(args.payments_cache)
+    )
 
 
 def sum_by_column(payments: pd.DataFrame, column: str) -> pd.DataFrame:

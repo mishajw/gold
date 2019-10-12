@@ -8,3 +8,6 @@ class Payment(NamedTuple):
     time: datetime
     category: Optional[str]
     source: str
+
+    def with_field(self, **kwargs) -> "Payment":
+        return self._replace(**kwargs)
