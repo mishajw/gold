@@ -1,4 +1,4 @@
 from .interceptor import Interceptor, MapInterceptor, FlatMapInterceptor
 
-from .rename import Rename
+from .modify import Modify
 from .shared_payments import SharedPayments

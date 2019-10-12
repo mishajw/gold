@@ -12,6 +12,7 @@ import streamlit as st
 
 import gold
 from gold import Payment, fetcher, interceptor, PaymentSpecifier
+from gold.payment import PaymentModifier
 
 TIME_FORMAT = "%Y-%m-%d %H-%M-%S"
 

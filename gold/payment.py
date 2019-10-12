@@ -14,6 +14,27 @@ class Payment(NamedTuple):
         return self._replace(**kwargs)
 
 
+class PaymentModifier(NamedTuple):
+    entity: Optional[str] = None
+    amount_pence: Optional[int] = None
+    time: Optional[datetime] = None
+    category: Optional[str] = None
+    source: Optional[str] = None
+
+    def modify(self, payment: Payment) -> "Payment":
+        if self.entity:
+            payment = payment.with_field(entity=self.entity)
+        if self.amount_pence:
+            payment = payment.with_field(amount_pence=self.amount_pence)
+        if self.time:
+            payment = payment.with_field(time=self.time)
+        if self.category:
+            payment = payment.with_field(category=self.category)
+        if self.source:
+            payment = payment.with_field(source=self.source)
+        return payment
+
+
 class PaymentSpecifier(NamedTuple):
     entity_regex: Optional[str] = None
     amount_pence_min: Optional[int] = None
