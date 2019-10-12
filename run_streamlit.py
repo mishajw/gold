@@ -41,16 +41,20 @@ def main():
     assert payments, "No payments matched."
 
     payments = pd.DataFrame(payments)
-    by_time = sum_by_column(round_to_period(payments, 7), "time")
-    by_entity = sum_by_column(payments, "entity")
-    by_category = sum_by_column(payments, "category")
 
     st.subheader("By date")
-    st.line_chart(index(by_time, "time"))
+    by_time = index(sum_by_column(round_to_period(payments, 7), "time").sort_values("time"), "time")
+    st.line_chart(by_time)
+    by_time["amount_pence"] = by_time["amount_pence"].cumsum()
+    st.line_chart(by_time)
+
     st.subheader("By entity")
+    by_entity = sum_by_column(payments, "entity")
     st.bar_chart(index(by_entity, "entity").sort_values("amount_pence").head(30), height=300)
     st.write(format_df(by_entity))
+
     st.subheader("By category")
+    by_category = sum_by_column(payments, "category")
     st.bar_chart(index(by_category, "category").sort_values("amount_pence"))
     st.write(format_df(by_category))
 
@@ -68,7 +72,7 @@ def get_payments() -> List[Payment]:
 
 
 def sum_by_column(payments: pd.DataFrame, column: str) -> pd.DataFrame:
-    return payments.groupby(column)["amount_pence"].sum().sort_values(ascending=False).reset_index()
+    return payments.groupby(column)["amount_pence"].sum().sort_values().reset_index()
 
 
 def index(df: pd.DataFrame, column: str) -> pd.DataFrame:
