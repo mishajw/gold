@@ -1,2 +1,2 @@
 libmonzo==0.1
-streamlit==0.47.4
+streamlit==1.37.0
